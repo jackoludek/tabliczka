@@ -618,11 +618,12 @@
     return new File([tekst], 'tabliczka-odpowiedzi.csv', { type: 'text/csv;charset=utf-8' });
   }
 
-  // W aplikacji na Androida (APK) nie ma pobierania plików ani Web Share; robi to kod Javy (TabliczkaAndroid).
-  const ANDROID = globalThis.TabliczkaAndroid || null;
+  // W aplikacjach (Android, iPad, Windows) zapis i wysyłanie tabeli robi kod programu:
+  // TabliczkaAndroid (Java, odpowiada od razu) albo TabliczkaNatywna (Swift i C#, odpowiadają obietnicą).
+  const NATYWNA = globalThis.TabliczkaAndroid || globalThis.TabliczkaNatywna || null;
 
   async function pobierz() {
-    if (ANDROID) { $('dane-info').textContent = ANDROID.zapisz('tabliczka-odpowiedzi.csv', S.csv(await B.odpowiedzi())); return; }
+    if (NATYWNA) { $('dane-info').textContent = await NATYWNA.zapisz('tabliczka-odpowiedzi.csv', S.csv(await B.odpowiedzi())); return; }
     const plik = await plikCsv();
     const url = URL.createObjectURL(plik);
     const a = document.createElement('a'); a.href = url; a.download = plik.name; document.body.appendChild(a); a.click(); a.remove();
@@ -631,7 +632,7 @@
   }
 
   async function udostepnij() {
-    if (ANDROID) { $('dane-info').textContent = ANDROID.wyslij('tabliczka-odpowiedzi.csv', S.csv(await B.odpowiedzi())); return; }
+    if (NATYWNA) { $('dane-info').textContent = await NATYWNA.wyslij('tabliczka-odpowiedzi.csv', S.csv(await B.odpowiedzi())); return; }
     try { await navigator.share({ files: [await plikCsv()], title: 'Tabliczka: odpowiedzi' }); $('dane-info').textContent = 'Wysłane.'; }
     catch (e) { if (e && e.name !== 'AbortError') $('dane-info').textContent = 'Nie udało się wysłać. Użyj „Pobierz tabelę”.'; }
   }
@@ -692,7 +693,7 @@
     $('wymien').addEventListener('click', wymien);
     $('dodaj-bonus').addEventListener('click', dodajBonus);
     $('pobierz-csv').addEventListener('click', pobierz);
-    if (ANDROID || (navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.csv', { type: 'text/csv' })] }))) {
+    if ((NATYWNA && NATYWNA.wyslij) || (navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.csv', { type: 'text/csv' })] }))) {
       $('udostepnij-csv').hidden = false;
       $('udostepnij-csv').addEventListener('click', udostepnij);
     }
@@ -729,8 +730,8 @@
     odswiezStart();
     pokaz('start');
     B.utrwal();
-    // W APK pliki są w aplikacji, więc service worker nie jest potrzebny.
-    if (!ANDROID && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    // W aplikacjach pliki są na miejscu, więc service worker nie jest potrzebny.
+    if (!NATYWNA && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
       navigator.serviceWorker.register('sw.js').catch(() => { /* bez pracy offline */ });
     }
   }
