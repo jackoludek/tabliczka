@@ -1,5 +1,5 @@
 /* Praca bez internetu (tylko przez HTTPS albo localhost). Pliki z pamięci, w tle odświeżane z sieci. */
-const WERSJA = 'tabliczka-42bb87d76e'; // podbij przy każdej zmianie plików, wtedy telefon pobierze nowe
+const WERSJA = 'tabliczka-6cb1cec5d2'; // podbij przy każdej zmianie plików, wtedy telefon pobierze nowe
 const PLIKI = ['./', 'index.html', 'styl.css', 'silnik.js', 'baza.js', 'przestawiane.js', 'app.js',
   'manifest.webmanifest', 'ikona.svg', 'ikona-180.png', 'ikona-192.png', 'ikona-512.png', 'ikona-maskowalna.png', 'inter.woff2'];
 
